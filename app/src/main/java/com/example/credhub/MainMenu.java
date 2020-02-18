@@ -40,8 +40,12 @@ public class MainMenu extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String clickedItem = (String) credListView.getItemAtPosition(position);
                 Toast.makeText(MainMenu.this, clickedItem, Toast.LENGTH_LONG).show();
+                Intent showPasswordExportRegistry = new Intent(MainMenu.this, ShowPasswordExportRegistry.class);
+                showPasswordExportRegistry.putExtra("clicked_item", clickedItem);
+                startActivity(showPasswordExportRegistry);
             }
         });
+
 
         Button new_register = findViewById(R.id.nuevo_registro);
         Button import_register = findViewById(R.id.importar_registro);
