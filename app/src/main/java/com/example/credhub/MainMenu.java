@@ -1,7 +1,10 @@
 package com.example.credhub;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,12 +28,42 @@ public class MainMenu extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        DatabaseHelper dbHelper = new DatabaseHelper(getApplicationContext());
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        String[] projection = {
+                BaseColumns._ID,
+                Database.DatabaseEntry.COLUMN_NAME_1,
+                Database.DatabaseEntry.COLUMN_NAME_2,
+                Database.DatabaseEntry.COLUMN_NAME_3
+        };
+
+        String sortOrder = Database.DatabaseEntry.COLUMN_NAME_1 + " DESC";
+
+        Cursor cursor = db.query(
+                Database.DatabaseEntry.TABLE_NAME,
+                projection,
+                null,
+                null,
+                null,
+                null,
+                sortOrder
+        );
+
         final ListView credListView = findViewById(R.id.lista_credenciales);
         ArrayList<String> credList = new ArrayList<>();
         credList.add("Gmail");
         credList.add("Windows");
         credList.add("GitHub");
         credList.add("Example");
+
+        while (cursor.moveToNext()) {
+            String serviceName = cursor.getString(
+                    cursor.getColumnIndexOrThrow(Database.DatabaseEntry.COLUMN_NAME_1));
+            credList.add(serviceName);
+        }
+        cursor.close();
+
         ArrayAdapter arrayAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1, credList);
         credListView.setAdapter(arrayAdapter);
