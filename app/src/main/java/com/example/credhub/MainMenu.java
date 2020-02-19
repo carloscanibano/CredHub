@@ -20,6 +20,7 @@ import androidx.appcompat.widget.Toolbar;
 import java.util.ArrayList;
 
 public class MainMenu extends AppCompatActivity {
+    DatabaseHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,8 +29,10 @@ public class MainMenu extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        DatabaseHelper dbHelper = new DatabaseHelper(getApplicationContext());
+        dbHelper = new DatabaseHelper(getApplicationContext());
         SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        //db.delete(Database.DatabaseEntry.TABLE_NAME, null, null);
 
         String[] projection = {
                 BaseColumns._ID,
@@ -52,10 +55,10 @@ public class MainMenu extends AppCompatActivity {
 
         final ListView credListView = findViewById(R.id.lista_credenciales);
         ArrayList<String> credList = new ArrayList<>();
-        credList.add("Gmail");
-        credList.add("Windows");
-        credList.add("GitHub");
-        credList.add("Example");
+        //credList.add("Gmail");
+        //credList.add("Windows");
+        //credList.add("GitHub");
+        //credList.add("Example");
 
         while (cursor.moveToNext()) {
             String serviceName = cursor.getString(
@@ -64,9 +67,9 @@ public class MainMenu extends AppCompatActivity {
         }
         cursor.close();
 
-        ArrayAdapter arrayAdapter = new ArrayAdapter<>(this,
+        GlobalClass.mainMenuAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1, credList);
-        credListView.setAdapter(arrayAdapter);
+        credListView.setAdapter(GlobalClass.mainMenuAdapter);
 
         credListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -79,7 +82,6 @@ public class MainMenu extends AppCompatActivity {
             }
         });
 
-
         Button new_register = findViewById(R.id.nuevo_registro);
         Button import_register = findViewById(R.id.importar_registro);
 
@@ -88,6 +90,7 @@ public class MainMenu extends AppCompatActivity {
             public void onClick(View v){
                 Intent newRegister = new Intent(MainMenu.this, NewRegister.class);
                 startActivity(newRegister);
+                finish();
             }
         });
 
@@ -96,8 +99,25 @@ public class MainMenu extends AppCompatActivity {
             public void onClick(View v){
                 Intent importRegister = new Intent(MainMenu.this, ImportRegistry.class);
                 startActivity(importRegister);
+                finish();
             }
         });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        dbHelper.close();
+        super.onDestroy();
     }
 
     @Override
