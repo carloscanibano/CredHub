@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -54,6 +55,7 @@ public class NewRegister extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String clickedItem = (String) appListView.getItemAtPosition(position);
+                GlobalClass.selectedItem = clickedItem;
                 Toast.makeText(NewRegister.this,clickedItem,Toast.LENGTH_LONG).show();
             }
         });
@@ -68,13 +70,14 @@ public class NewRegister extends AppCompatActivity {
                 EditText campo_password = findViewById(R.id.campo_password);
 
                 if ((campo_usuario.getText().toString().trim().length() == 0) ||
-                        (campo_password.getText().toString().length() == 0)) {
-                    Toast.makeText(NewRegister.this,"Los campos de usuario y contraseña son obligatorios",Toast.LENGTH_LONG).show();
+                        (campo_password.getText().toString().trim().length() == 0) ||
+                        (GlobalClass.selectedItem.trim().length() == 0)) {
+                    Toast.makeText(NewRegister.this,"Introduzca usuario, contraseña y seleccione un servicio",Toast.LENGTH_LONG).show();
                 } else {
                     DatabaseHelper dbHelper = new DatabaseHelper(getApplicationContext());
                     SQLiteDatabase db = dbHelper.getWritableDatabase();
                     ContentValues values = new ContentValues();
-                    values.put(Database.DatabaseEntry.COLUMN_NAME_1, "");
+                    values.put(Database.DatabaseEntry.COLUMN_NAME_1, GlobalClass.selectedItem);
                     values.put(Database.DatabaseEntry.COLUMN_NAME_2, campo_usuario.getText().toString());
                     values.put(Database.DatabaseEntry.COLUMN_NAME_3, campo_password.getText().toString());
                     long newRowId = db.insert(Database.DatabaseEntry.TABLE_NAME, null, values);
