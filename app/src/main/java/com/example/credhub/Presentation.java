@@ -22,6 +22,11 @@ public class Presentation extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        if (GlobalClass.dbHelper == null) {
+            GlobalClass.dbHelper = new DatabaseHelper(getApplicationContext());
+            GlobalClass.db = GlobalClass.dbHelper.getWritableDatabase();
+        }
+
         Thread reloj = new Thread(){
             public void run() {
                 try{
@@ -33,6 +38,7 @@ public class Presentation extends AppCompatActivity {
                 finally {
                     Intent menuPrincipal = new Intent(Presentation.this, MainMenu.class);
                     startActivity(menuPrincipal);
+                    finish();
                 }
             }
         };

@@ -2,15 +2,22 @@ package com.example.credhub;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.provider.BaseColumns;
+import android.provider.Settings;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import static android.os.SystemClock.sleep;
 
 public class ShowPasswordExportRegistry extends AppCompatActivity {
-    DatabaseHelper dbHelper;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -20,7 +27,8 @@ public class ShowPasswordExportRegistry extends AppCompatActivity {
 
         TextView app_id = findViewById(R.id.identificador_app);
         TextView username = findViewById(R.id.nombre_usuario);
-        TextView password = findViewById(R.id.contraseña);
+        TextView pass = findViewById(R.id.contraseña);
+        Button show_password = findViewById(R.id.mostrar_contraseña);
 
         String clicked_item = null;
         if (bundle != null) {
@@ -28,8 +36,10 @@ public class ShowPasswordExportRegistry extends AppCompatActivity {
         }
         app_id.setText(clicked_item);
 
-        dbHelper = new DatabaseHelper(getApplicationContext());
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        if (GlobalClass.dbHelper == null) {
+            GlobalClass.dbHelper = new DatabaseHelper(getApplicationContext());
+            GlobalClass.db = GlobalClass.dbHelper.getReadableDatabase();
+        }
 
         String[] projection = {
                 BaseColumns._ID,
@@ -42,7 +52,7 @@ public class ShowPasswordExportRegistry extends AppCompatActivity {
 
         String sortOrder = Database.DatabaseEntry.COLUMN_NAME_1 + " DESC";
 
-        Cursor cursor = db.query(
+        Cursor cursor = GlobalClass.db.query(
                 Database.DatabaseEntry.TABLE_NAME,
                 projection,
                 selection,
@@ -52,18 +62,41 @@ public class ShowPasswordExportRegistry extends AppCompatActivity {
                 sortOrder
         );
 
-        String name, pass;
+        String user, pw;
         cursor.moveToNext();
-        name = cursor.getString(cursor.getColumnIndexOrThrow(Database.DatabaseEntry.COLUMN_NAME_2));
-        pass = cursor.getString(cursor.getColumnIndexOrThrow(Database.DatabaseEntry.COLUMN_NAME_3));
+        user = cursor.getString(cursor.getColumnIndexOrThrow(Database.DatabaseEntry.COLUMN_NAME_2));
+        pw = cursor.getString(cursor.getColumnIndexOrThrow(Database.DatabaseEntry.COLUMN_NAME_3));
         cursor.close();
 
-        username.setText(name);
-        password.setText(pass);
+        username.setText(user);
+        pass.setText(pw);
+        pass.setVisibility(View.INVISIBLE);
+
+        show_password.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                TextView password = findViewById(R.id.contraseña);
+                password.setVisibility(View.VISIBLE);
+                //Toast.makeText(ShowPasswordExportRegistry.this,"Contraseña disponible 5 segundos",Toast.LENGTH_LONG).show();
+                password.postDelayed(new Runnable() {
+                    public void run() {
+                        TextView password = findViewById(R.id.contraseña);
+                        password.setVisibility(View.INVISIBLE);
+                    }
+                }, 5000);
+            }
+        });
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(ShowPasswordExportRegistry.this, MainMenu.class);
+        startActivity(intent);
     }
 
     public void onDestroy() {
-        dbHelper.close();
+        //GlobalClass.dbHelper.close();
         super.onDestroy();
     }
 }

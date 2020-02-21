@@ -25,8 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NewRegister extends AppCompatActivity {
-    DatabaseHelper dbHelper;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,9 +53,8 @@ public class NewRegister extends AppCompatActivity {
         appListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String clickedItem = (String) appListView.getItemAtPosition(position);
-                GlobalClass.selectedItem = clickedItem;
-                Toast.makeText(NewRegister.this,clickedItem,Toast.LENGTH_LONG).show();
+                GlobalClass.selectedItem = (String) appListView.getItemAtPosition(position);
+                //Toast.makeText(NewRegister.this,clickedItem,Toast.LENGTH_LONG).show();
             }
         });
 
@@ -75,15 +72,20 @@ public class NewRegister extends AppCompatActivity {
                         (GlobalClass.selectedItem.trim().length() == 0)) {
                     Toast.makeText(NewRegister.this,"Introduzca usuario, contraseña y seleccione un servicio",Toast.LENGTH_LONG).show();
                 } else {
-                    dbHelper = new DatabaseHelper(getApplicationContext());
-                    SQLiteDatabase db = dbHelper.getWritableDatabase();
+                    if (GlobalClass.dbHelper == null) {
+                        GlobalClass.dbHelper = new DatabaseHelper(getApplicationContext());
+                        GlobalClass.db = GlobalClass.dbHelper.getWritableDatabase();
+                    }
                     ContentValues values = new ContentValues();
                     values.put(Database.DatabaseEntry.COLUMN_NAME_1, GlobalClass.selectedItem);
                     values.put(Database.DatabaseEntry.COLUMN_NAME_2, campo_usuario.getText().toString());
                     values.put(Database.DatabaseEntry.COLUMN_NAME_3, campo_password.getText().toString());
-                    long newRowId = db.insert(Database.DatabaseEntry.TABLE_NAME, null, values);
+                    long newRowId = GlobalClass.db.insert(Database.DatabaseEntry.TABLE_NAME, null, values);
                     //GlobalClass.mainMenuAdapter.notifyDataSetChanged();
                     Toast.makeText(NewRegister.this,"Registro añadido con id: " + newRowId,Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(NewRegister.this, MainMenu.class);
+                    startActivity(intent);
+                    finish();
                 }
             }
         });
@@ -97,7 +99,7 @@ public class NewRegister extends AppCompatActivity {
     }
 
     public void onDestroy() {
-        dbHelper.close();
+        //GlobalClass.dbHelper.close();
         super.onDestroy();
     }
 }

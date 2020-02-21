@@ -20,8 +20,6 @@ import androidx.appcompat.widget.Toolbar;
 import java.util.ArrayList;
 
 public class MainMenu extends AppCompatActivity {
-    DatabaseHelper dbHelper;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,9 +27,10 @@ public class MainMenu extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        dbHelper = new DatabaseHelper(getApplicationContext());
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-
+        if (GlobalClass.dbHelper == null) {
+            GlobalClass.dbHelper = new DatabaseHelper(getApplicationContext());
+            GlobalClass.db = GlobalClass.dbHelper.getWritableDatabase();
+        }
         //db.delete(Database.DatabaseEntry.TABLE_NAME, null, null);
 
         String[] projection = {
@@ -43,7 +42,7 @@ public class MainMenu extends AppCompatActivity {
 
         String sortOrder = Database.DatabaseEntry.COLUMN_NAME_1 + " DESC";
 
-        Cursor cursor = db.query(
+        Cursor cursor = GlobalClass.db.query(
                 Database.DatabaseEntry.TABLE_NAME,
                 projection,
                 null,
@@ -75,7 +74,7 @@ public class MainMenu extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String clickedItem = (String) credListView.getItemAtPosition(position);
-                Toast.makeText(MainMenu.this, clickedItem, Toast.LENGTH_LONG).show();
+                //Toast.makeText(MainMenu.this, clickedItem, Toast.LENGTH_LONG).show();
                 Intent showPasswordExportRegistry = new Intent(MainMenu.this, ShowPasswordExportRegistry.class);
                 showPasswordExportRegistry.putExtra("clicked_item", clickedItem);
                 startActivity(showPasswordExportRegistry);
@@ -116,7 +115,7 @@ public class MainMenu extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        dbHelper.close();
+        //GlobalClass.dbHelper.close();
         super.onDestroy();
     }
 
