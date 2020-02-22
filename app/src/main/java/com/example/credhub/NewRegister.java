@@ -76,13 +76,49 @@ public class NewRegister extends AppCompatActivity {
                         GlobalClass.dbHelper = new DatabaseHelper(getApplicationContext());
                         GlobalClass.db = GlobalClass.dbHelper.getWritableDatabase();
                     }
+
+                    String[] projection = {
+                      Database.DatabaseEntry.COLUMN_NAME_1
+                    };
+                    String selection = Database.DatabaseEntry.COLUMN_NAME_1 + " = ?";
+                    String[] selectionArgs = { GlobalClass.selectedItem };
+                    String sortOrder = Database.DatabaseEntry.COLUMN_NAME_1 + " DESC";
+                    Cursor cursor = GlobalClass.db.query(
+                            Database.DatabaseEntry.TABLE_NAME,
+                            projection,
+                            selection,
+                            selectionArgs,
+                            null,
+                            null,
+                            sortOrder
+                    );
+
                     ContentValues values = new ContentValues();
-                    values.put(Database.DatabaseEntry.COLUMN_NAME_1, GlobalClass.selectedItem);
-                    values.put(Database.DatabaseEntry.COLUMN_NAME_2, campo_usuario.getText().toString());
-                    values.put(Database.DatabaseEntry.COLUMN_NAME_3, campo_password.getText().toString());
-                    long newRowId = GlobalClass.db.insert(Database.DatabaseEntry.TABLE_NAME, null, values);
-                    //GlobalClass.mainMenuAdapter.notifyDataSetChanged();
-                    Toast.makeText(NewRegister.this,"Registro añadido con id: " + newRowId,Toast.LENGTH_LONG).show();
+
+                    if (cursor.getCount() > 0) {
+                        values.put(Database.DatabaseEntry.COLUMN_NAME_1, GlobalClass.selectedItem);
+                        values.put(Database.DatabaseEntry.COLUMN_NAME_2, campo_usuario.getText().toString());
+                        values.put(Database.DatabaseEntry.COLUMN_NAME_3, campo_password.getText().toString());
+                        String select = Database.DatabaseEntry.COLUMN_NAME_1 + " LIKE ?";
+                        String[] selectArgs = { GlobalClass.selectedItem };
+                        int count = GlobalClass.db.update(
+                                Database.DatabaseEntry.TABLE_NAME,
+                                values,
+                                select,
+                                selectArgs
+                        );
+
+                        if (count != 0) Toast.makeText(NewRegister.this,"El registro existe; se ha actualizado",Toast.LENGTH_LONG).show();
+                    } else {
+                        values.put(Database.DatabaseEntry.COLUMN_NAME_1, GlobalClass.selectedItem);
+                        values.put(Database.DatabaseEntry.COLUMN_NAME_2, campo_usuario.getText().toString());
+                        values.put(Database.DatabaseEntry.COLUMN_NAME_3, campo_password.getText().toString());
+                        long newRowId = GlobalClass.db.insert(Database.DatabaseEntry.TABLE_NAME, null, values);
+                        //GlobalClass.mainMenuAdapter.notifyDataSetChanged();
+                        Toast.makeText(NewRegister.this,"Registro añadido con id: " + newRowId,Toast.LENGTH_LONG).show();
+                    }
+
+                    if (cursor != null) cursor.close();
                     Intent intent = new Intent(NewRegister.this, MainMenu.class);
                     startActivity(intent);
                     finish();

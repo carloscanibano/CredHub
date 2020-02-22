@@ -31,7 +31,7 @@ public class MainMenu extends AppCompatActivity {
             GlobalClass.dbHelper = new DatabaseHelper(getApplicationContext());
             GlobalClass.db = GlobalClass.dbHelper.getWritableDatabase();
         }
-        //db.delete(Database.DatabaseEntry.TABLE_NAME, null, null);
+        //GlobalClass.db.delete(Database.DatabaseEntry.TABLE_NAME, null, null);
 
         String[] projection = {
                 BaseColumns._ID,
