@@ -2,29 +2,26 @@ package com.example.credhub;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.provider.BaseColumns;
-import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import static android.os.SystemClock.sleep;
 
 public class ShowPasswordExportRegistry extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_password_export_registry);
+        setTitle("Mostrar Contraseña / Exportar Registro");
 
+        // Retrieving data from the last activity
         Bundle bundle = getIntent().getExtras();
 
+        // Preparing all the views and buttons we need to operate with
         TextView app_id = findViewById(R.id.identificador_app);
         TextView username = findViewById(R.id.nombre_usuario);
         TextView pass = findViewById(R.id.contraseña);
@@ -38,11 +35,13 @@ public class ShowPasswordExportRegistry extends AppCompatActivity {
         }
         app_id.setText(clicked_item);
 
+        // Database utils are managed from a global class
         if (GlobalClass.dbHelper == null) {
             GlobalClass.dbHelper = new DatabaseHelper(getApplicationContext());
             GlobalClass.db = GlobalClass.dbHelper.getReadableDatabase();
         }
 
+        // Once we have the service name, we look for the stored user name and password values
         String[] projection = {
                 BaseColumns._ID,
                 Database.DatabaseEntry.COLUMN_NAME_2,
@@ -74,13 +73,13 @@ public class ShowPasswordExportRegistry extends AppCompatActivity {
         pass.setText(pw);
         pass.setVisibility(View.INVISIBLE);
 
+        // Showing password for only 5 seconds when user clicks
         show_password.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)
             {
                 TextView password = findViewById(R.id.contraseña);
                 password.setVisibility(View.VISIBLE);
-                //Toast.makeText(ShowPasswordExportRegistry.this,"Contraseña disponible 5 segundos",Toast.LENGTH_LONG).show();
                 password.postDelayed(new Runnable() {
                     public void run() {
                         TextView password = findViewById(R.id.contraseña);
@@ -90,6 +89,7 @@ public class ShowPasswordExportRegistry extends AppCompatActivity {
             }
         });
 
+        // Deleting the current registry from database
         delete_registry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)
@@ -106,18 +106,23 @@ public class ShowPasswordExportRegistry extends AppCompatActivity {
             }
         });
 
+        // Exporting current registry to remote repository
         export_registry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)
             {
-                TextView srv = findViewById(R.id.identificador_app);
-                String service = srv.getText().toString();
-                String selection = Database.DatabaseEntry.COLUMN_NAME_1 + " LIKE ?";
-                String[] selectionArgs = { service };
-                int deletedRows = GlobalClass.db.delete(Database.DatabaseEntry.TABLE_NAME, selection, selectionArgs);
-                if (deletedRows != 0) Toast.makeText(ShowPasswordExportRegistry.this,"Entrada eliminada del registro",Toast.LENGTH_LONG).show();
-                Intent mainMenu = new Intent(ShowPasswordExportRegistry.this, MainMenu.class);
-                startActivity(mainMenu);
+                TextView service, user, password;
+                service = findViewById(R.id.identificador_app);
+                user = findViewById(R.id.nombre_usuario);
+                password = findViewById(R.id.contraseña);
+                String[] strings = new String[4];
+                strings[0] = "export";
+                strings[1] = service.getText().toString();
+                strings[2] = user.getText().toString();
+                strings[3] = password.getText().toString();
+                new RepositoryTask().execute(strings);
+                Intent intent = new Intent(ShowPasswordExportRegistry.this, MainMenu.class);
+                startActivity(intent);
                 finish();
             }
         });
@@ -125,12 +130,8 @@ public class ShowPasswordExportRegistry extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        // Making sure we show updated data in all views
         Intent intent = new Intent(ShowPasswordExportRegistry.this, MainMenu.class);
         startActivity(intent);
-    }
-
-    public void onDestroy() {
-        //GlobalClass.dbHelper.close();
-        super.onDestroy();
     }
 }

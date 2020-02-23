@@ -7,11 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.provider.BaseColumns;
-import android.provider.ContactsContract;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -29,16 +25,16 @@ public class NewRegister extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_register);
+        setTitle("Nuevo Registro");
 
+        // Creating a list for Android installed applications and finding the proper view
         final ListView appListView = findViewById(R.id.lista_aplicaciones);
         ArrayList<String> appList = new ArrayList<>();
-        //credList.add("Windows");
 
+        //Get a list of installed apps
         final String TAG = ImportRegistry.class.getSimpleName();
         final PackageManager pm = getPackageManager();
-        //get a list of installed apps.
         List<PackageInfo> packages = pm.getInstalledPackages(0);
-
         for (PackageInfo packageInfo : packages) {
             Log.d(TAG, "Installed package :" + packageInfo.packageName);
             Log.d(TAG, "Launch Activity :" + pm.getLaunchIntentForPackage(packageInfo.packageName));
@@ -50,6 +46,7 @@ public class NewRegister extends AppCompatActivity {
                 android.R.layout.simple_list_item_1, appList);
         appListView.setAdapter(arrayAdapter);
 
+        // Selected item gets stored inside our global class to perform operations inside listeners
         appListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -58,8 +55,8 @@ public class NewRegister extends AppCompatActivity {
             }
         });
 
+        // When the action starts, first we check for a possible update, if not, an insert is done
         Button nuevo_registro_action = findViewById(R.id.nuevo_registro_action);
-
         nuevo_registro_action.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)
@@ -67,6 +64,7 @@ public class NewRegister extends AppCompatActivity {
                 EditText campo_usuario = findViewById(R.id.campo_usuario);
                 EditText campo_password = findViewById(R.id.campo_password);
 
+                // All fields must be selected in order to perform the operation
                 if ((campo_usuario.getText().toString().trim().length() == 0) ||
                         (campo_password.getText().toString().trim().length() == 0) ||
                         (GlobalClass.selectedItem.trim().length() == 0)) {
@@ -77,6 +75,7 @@ public class NewRegister extends AppCompatActivity {
                         GlobalClass.db = GlobalClass.dbHelper.getWritableDatabase();
                     }
 
+                    // Is the selected item inside our database?
                     String[] projection = {
                       Database.DatabaseEntry.COLUMN_NAME_1
                     };
@@ -95,6 +94,7 @@ public class NewRegister extends AppCompatActivity {
 
                     ContentValues values = new ContentValues();
 
+                    // If cursor has values, it means we need to perform an update, else, an insert
                     if (cursor.getCount() > 0) {
                         values.put(Database.DatabaseEntry.COLUMN_NAME_1, GlobalClass.selectedItem);
                         values.put(Database.DatabaseEntry.COLUMN_NAME_2, campo_usuario.getText().toString());
@@ -114,10 +114,10 @@ public class NewRegister extends AppCompatActivity {
                         values.put(Database.DatabaseEntry.COLUMN_NAME_2, campo_usuario.getText().toString());
                         values.put(Database.DatabaseEntry.COLUMN_NAME_3, campo_password.getText().toString());
                         long newRowId = GlobalClass.db.insert(Database.DatabaseEntry.TABLE_NAME, null, values);
-                        //GlobalClass.mainMenuAdapter.notifyDataSetChanged();
                         Toast.makeText(NewRegister.this,"Registro añadido con id: " + newRowId,Toast.LENGTH_LONG).show();
                     }
 
+                    // Freeing resources and going back to the main menu
                     cursor.close();
                     Intent intent = new Intent(NewRegister.this, MainMenu.class);
                     startActivity(intent);
@@ -130,12 +130,8 @@ public class NewRegister extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        // Making sure we show views with updated database info
         Intent intent = new Intent(NewRegister.this, MainMenu.class);
         startActivity(intent);
-    }
-
-    public void onDestroy() {
-        //GlobalClass.dbHelper.close();
-        super.onDestroy();
     }
 }

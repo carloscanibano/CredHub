@@ -2,17 +2,13 @@ package com.example.credhub;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.provider.BaseColumns;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -27,12 +23,16 @@ public class MainMenu extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // Database utils are managed in a global class
         if (GlobalClass.dbHelper == null) {
             GlobalClass.dbHelper = new DatabaseHelper(getApplicationContext());
             GlobalClass.db = GlobalClass.dbHelper.getWritableDatabase();
         }
+
+        //In case you want to delete the local database, use this line
         //GlobalClass.db.delete(Database.DatabaseEntry.TABLE_NAME, null, null);
 
+        // The following actions perform a select SQL statement
         String[] projection = {
                 BaseColumns._ID,
                 Database.DatabaseEntry.COLUMN_NAME_1,
@@ -52,12 +52,9 @@ public class MainMenu extends AppCompatActivity {
                 sortOrder
         );
 
+        // Filling our list with database retrieved data
         final ListView credListView = findViewById(R.id.lista_credenciales);
         ArrayList<String> credList = new ArrayList<>();
-        //credList.add("Gmail");
-        //credList.add("Windows");
-        //credList.add("GitHub");
-        //credList.add("Example");
 
         while (cursor.moveToNext()) {
             String serviceName = cursor.getString(
@@ -66,16 +63,16 @@ public class MainMenu extends AppCompatActivity {
         }
         cursor.close();
 
+        // Filling our list view with items
         GlobalClass.mainMenuAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1, credList);
         credListView.setAdapter(GlobalClass.mainMenuAdapter);
-
         credListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String clickedItem = (String) credListView.getItemAtPosition(position);
-                //Toast.makeText(MainMenu.this, clickedItem, Toast.LENGTH_LONG).show();
                 Intent showPasswordExportRegistry = new Intent(MainMenu.this, ShowPasswordExportRegistry.class);
+                // Making sure we know in the next activity which value the user selected
                 showPasswordExportRegistry.putExtra("clicked_item", clickedItem);
                 startActivity(showPasswordExportRegistry);
             }
@@ -101,43 +98,5 @@ public class MainMenu extends AppCompatActivity {
                 finish();
             }
         });
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    public void onDestroy() {
-        //GlobalClass.dbHelper.close();
-        super.onDestroy();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }

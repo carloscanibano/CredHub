@@ -3,7 +3,6 @@ package com.example.credhub;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import com.example.credhub.Database;
 
 import static com.example.credhub.Database.SQL_CREATE_ENTRIES;
 import static com.example.credhub.Database.SQL_DELETE_ENTRIES;
