@@ -118,7 +118,7 @@ public class NewRegister extends AppCompatActivity {
                         Toast.makeText(NewRegister.this,"Registro añadido con id: " + newRowId,Toast.LENGTH_LONG).show();
                     }
 
-                    if (cursor != null) cursor.close();
+                    cursor.close();
                     Intent intent = new Intent(NewRegister.this, MainMenu.class);
                     startActivity(intent);
                     finish();

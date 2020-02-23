@@ -29,6 +29,8 @@ public class ShowPasswordExportRegistry extends AppCompatActivity {
         TextView username = findViewById(R.id.nombre_usuario);
         TextView pass = findViewById(R.id.contraseña);
         Button show_password = findViewById(R.id.mostrar_contraseña);
+        Button delete_registry = findViewById(R.id.borrar_registro);
+        Button export_registry = findViewById(R.id.make_nuevo_registro);
 
         String clicked_item = null;
         if (bundle != null) {
@@ -85,6 +87,38 @@ public class ShowPasswordExportRegistry extends AppCompatActivity {
                         password.setVisibility(View.INVISIBLE);
                     }
                 }, 5000);
+            }
+        });
+
+        delete_registry.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                TextView srv = findViewById(R.id.identificador_app);
+                String service = srv.getText().toString();
+                String selection = Database.DatabaseEntry.COLUMN_NAME_1 + " LIKE ?";
+                String[] selectionArgs = { service };
+                int deletedRows = GlobalClass.db.delete(Database.DatabaseEntry.TABLE_NAME, selection, selectionArgs);
+                if (deletedRows != 0) Toast.makeText(ShowPasswordExportRegistry.this,"Entrada eliminada del registro",Toast.LENGTH_LONG).show();
+                Intent mainMenu = new Intent(ShowPasswordExportRegistry.this, MainMenu.class);
+                startActivity(mainMenu);
+                finish();
+            }
+        });
+
+        export_registry.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                TextView srv = findViewById(R.id.identificador_app);
+                String service = srv.getText().toString();
+                String selection = Database.DatabaseEntry.COLUMN_NAME_1 + " LIKE ?";
+                String[] selectionArgs = { service };
+                int deletedRows = GlobalClass.db.delete(Database.DatabaseEntry.TABLE_NAME, selection, selectionArgs);
+                if (deletedRows != 0) Toast.makeText(ShowPasswordExportRegistry.this,"Entrada eliminada del registro",Toast.LENGTH_LONG).show();
+                Intent mainMenu = new Intent(ShowPasswordExportRegistry.this, MainMenu.class);
+                startActivity(mainMenu);
+                finish();
             }
         });
     }
